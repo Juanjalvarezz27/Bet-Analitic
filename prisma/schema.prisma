@@ -1,0 +1,48 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum BetStatus {
+  PENDING
+  WON
+  LOST
+  VOID
+}
+
+enum BankEventType {
+  DEPOSIT
+  WITHDRAWAL
+  BANKRUPT
+  BALANCE_UPDATE
+}
+
+model Bet {
+  id          String    @id @default(cuid())
+  date        DateTime  @default(now())
+  sport       String    @default("Desconocido")
+  event       String    @default("")
+  market      String    @default("")
+  stake       Float
+  odds        Float     @default(1.0)
+  status      BetStatus @default(PENDING)
+  profit      Float?
+  externalId  String?   @unique
+  betNumber   String?
+  reference   String?
+  rawDate     String?
+}
+
+model BankEvent {
+  id        String        @id @default(cuid())
+  date      DateTime      @default(now())
+  type      BankEventType
+  amount    Float         @default(0) // 0 en quiebra
+  note      String?
+}
