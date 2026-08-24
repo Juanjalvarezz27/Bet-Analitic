@@ -35,15 +35,16 @@ export default async function BankPage() {
         <div className="relative flex flex-col items-center gap-2">
           <span className="text-slate-400 text-xs font-medium uppercase tracking-[0.2em]">Saldo Disponible</span>
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-2xl">
-              <Wallet className="w-7 h-7 text-orange-400" />
+            <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-2xl shrink-0">
+              <Wallet className="w-6 h-6 text-orange-400" />
             </div>
-            <span className={cn(
-              "text-5xl font-black tracking-tight",
+            <div className={cn(
+              "text-3xl sm:text-4xl font-black tracking-tight break-all",
               displayBankroll > 0 ? "text-white" : displayBankroll < 0 ? "text-red-400" : "text-slate-400"
             )}>
-              Bs {displayBankroll.toFixed(2)}
-            </span>
+              <span className="text-xl sm:text-2xl mr-1 opacity-80">Bs</span>
+              {displayBankroll.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
           </div>
         </div>
       </div>
@@ -57,8 +58,8 @@ export default async function BankPage() {
                 <stat.icon className={cn("w-3.5 h-3.5", stat.color)} />
                 <span className="text-[10px] text-slate-400 uppercase tracking-widest font-medium">{stat.label}</span>
               </div>
-              <span className={cn("text-lg font-black leading-none", stat.color)}>
-                {stat.prefix}Bs {stat.value.toFixed(2)}
+              <span className={cn("text-base sm:text-lg font-black leading-none break-all", stat.color)}>
+                {stat.prefix}Bs {stat.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
           ))}
