@@ -41,7 +41,7 @@ export default async function Dashboard() {
         </div>
 
         {/* Tarjetas: Profit hoy y Profit total */}
-        <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+        <div className="flex flex-col gap-3 w-full max-w-sm">
           {/* Profit de Hoy */}
           <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-2 shadow-lg overflow-hidden">
             <div className="flex items-center gap-1.5 text-slate-400">
