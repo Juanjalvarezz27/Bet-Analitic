@@ -26,57 +26,58 @@ export default async function Dashboard() {
           <span className="text-slate-400 text-xs font-medium uppercase tracking-widest">
             Saldo en Casino
           </span>
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-slate-800/40 backdrop-blur-xl rounded-2xl border border-slate-700/50 shadow-xl shadow-black/20">
+          <div className="flex items-center gap-3 w-full justify-center">
+            <div className="p-3 bg-slate-800/40 backdrop-blur-xl rounded-2xl border border-slate-700/50 shadow-xl shadow-black/20 shrink-0">
               <Wallet className="w-8 h-8 text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]" />
             </div>
-            <span className={cn(
-              "text-4xl font-black tracking-tight",
+            <div className={cn(
+              "text-3xl sm:text-4xl font-black tracking-tight break-all",
               casinoBankroll > 0 ? "text-slate-100" : casinoBankroll < 0 ? "text-red-400" : "text-slate-400"
             )}>
-              Bs {casinoBankroll.toFixed(2)}
-            </span>
+              <span className="text-xl sm:text-2xl mr-1 opacity-80">Bs</span>
+              {casinoBankroll.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
           </div>
         </div>
 
         {/* Tarjetas: Profit hoy y Profit total */}
         <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
           {/* Profit de Hoy */}
-          <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-2 shadow-lg">
+          <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-2 shadow-lg overflow-hidden">
             <div className="flex items-center gap-1.5 text-slate-400">
-              <CalendarDays className="w-3.5 h-3.5" />
+              <CalendarDays className="w-3.5 h-3.5 shrink-0" />
               <span className="text-[10px] uppercase tracking-widest font-medium">Hoy</span>
             </div>
             <div className="flex items-center gap-1.5">
               {todayProfit >= 0
-                ? <TrendingUp className="w-4 h-4 text-emerald-400" />
-                : <TrendingDown className="w-4 h-4 text-red-400" />
+                ? <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
+                : <TrendingDown className="w-4 h-4 text-red-400 shrink-0" />
               }
               <span className={cn(
-                "text-xl font-black",
+                "text-lg sm:text-xl font-black break-all leading-tight",
                 todayProfit > 0 ? "text-emerald-400" : todayProfit < 0 ? "text-red-400" : "text-slate-400"
               )}>
-                {todayProfit >= 0 ? '+' : ''}Bs {todayProfit.toFixed(2)}
+                {todayProfit >= 0 ? '+' : ''}Bs {todayProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
           </div>
 
           {/* Profit Global */}
-          <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-2 shadow-lg">
+          <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-2 shadow-lg overflow-hidden">
             <div className="flex items-center gap-1.5 text-slate-400">
-              <BarChart2 className="w-3.5 h-3.5" />
+              <BarChart2 className="w-3.5 h-3.5 shrink-0" />
               <span className="text-[10px] uppercase tracking-widest font-medium">Total</span>
             </div>
             <div className="flex items-center gap-1.5">
               {globalProfit >= 0
-                ? <TrendingUp className="w-4 h-4 text-blue-400" />
-                : <TrendingDown className="w-4 h-4 text-red-400" />
+                ? <TrendingUp className="w-4 h-4 text-blue-400 shrink-0" />
+                : <TrendingDown className="w-4 h-4 text-red-400 shrink-0" />
               }
               <span className={cn(
-                "text-xl font-black",
+                "text-lg sm:text-xl font-black break-all leading-tight",
                 globalProfit > 0 ? "text-blue-400" : globalProfit < 0 ? "text-red-400" : "text-slate-400"
               )}>
-                {globalProfit >= 0 ? '+' : ''}Bs {globalProfit.toFixed(2)}
+                {globalProfit >= 0 ? '+' : ''}Bs {globalProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
           </div>
