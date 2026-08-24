@@ -73,9 +73,19 @@ export async function getDashboardData() {
     where: { status: { in: ['WON', 'LOST', 'VOID'] } },
   });
 
+  // Profit solo del día de hoy
+  const todayProfit = await prisma.bet.aggregate({
+    _sum: { profit: true },
+    where: { 
+      status: { in: ['WON', 'LOST', 'VOID'] },
+      date: { gte: startOfDay },
+    },
+  });
+
   return {
     recentBets: bets,
     globalProfit: totalProfit._sum.profit || 0,
+    todayProfit: todayProfit._sum.profit || 0,
   };
 }
 

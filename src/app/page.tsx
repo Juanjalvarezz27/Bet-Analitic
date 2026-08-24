@@ -2,36 +2,84 @@ import { getDashboardData } from '@/lib/actions/bet-actions';
 import { getBankrollState } from '@/lib/actions/bank-actions';
 import BetCard from '@/components/BetCard';
 import FAB from '@/components/FAB';
-import { Wallet, Skull, ArrowDownCircle } from 'lucide-react';
+import { Wallet, Skull, TrendingUp, TrendingDown, CalendarDays, BarChart2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Dashboard() {
-  const [{ recentBets, globalProfit }, { isBankrupt, totalDeposited }] = await Promise.all([
+  const [{ recentBets, globalProfit, todayProfit }, { isBankrupt, totalDeposited, totalWithdrawn }] = await Promise.all([
     getDashboardData(),
     getBankrollState(),
   ]);
 
-  // El profit mostrado es simplemente la suma de las ganancias/pérdidas de las apuestas
-  const displayProfit = globalProfit;
+  // Saldo disponible en el casino = capital activo + ganancias de apuestas
+  const netCapital = totalDeposited - totalWithdrawn;
+  const casinoBankroll = netCapital + globalProfit;
 
   return (
     <main className="flex-1 flex flex-col p-4 w-full h-full pb-20">
-      <header className="py-6 flex flex-col items-center justify-center">
-        <h1 className="text-slate-400 text-sm font-medium uppercase tracking-widest mb-2">
-          Profit Global
-        </h1>
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-slate-800/40 backdrop-blur-xl rounded-2xl border border-slate-700/50 shadow-xl shadow-black/20">
-            <Wallet className="w-8 h-8 text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]" />
-          </div>
-          <span className={cn(
-            "text-4xl font-black tracking-tight",
-            displayProfit > 0 ? "text-emerald-400" : displayProfit < 0 ? "text-red-400" : "text-slate-100"
-          )}>
-            {displayProfit >= 0 ? '+' : ''}Bs {displayProfit.toFixed(2)}
+      <header className="py-6 flex flex-col items-center justify-center gap-6">
+
+        {/* Saldo disponible en casino — número principal */}
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-slate-400 text-xs font-medium uppercase tracking-widest">
+            Saldo en Casino
           </span>
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-slate-800/40 backdrop-blur-xl rounded-2xl border border-slate-700/50 shadow-xl shadow-black/20">
+              <Wallet className="w-8 h-8 text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]" />
+            </div>
+            <span className={cn(
+              "text-4xl font-black tracking-tight",
+              casinoBankroll > 0 ? "text-slate-100" : casinoBankroll < 0 ? "text-red-400" : "text-slate-400"
+            )}>
+              Bs {casinoBankroll.toFixed(2)}
+            </span>
+          </div>
+        </div>
+
+        {/* Tarjetas: Profit hoy y Profit total */}
+        <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+          {/* Profit de Hoy */}
+          <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-2 shadow-lg">
+            <div className="flex items-center gap-1.5 text-slate-400">
+              <CalendarDays className="w-3.5 h-3.5" />
+              <span className="text-[10px] uppercase tracking-widest font-medium">Hoy</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {todayProfit >= 0
+                ? <TrendingUp className="w-4 h-4 text-emerald-400" />
+                : <TrendingDown className="w-4 h-4 text-red-400" />
+              }
+              <span className={cn(
+                "text-xl font-black",
+                todayProfit > 0 ? "text-emerald-400" : todayProfit < 0 ? "text-red-400" : "text-slate-400"
+              )}>
+                {todayProfit >= 0 ? '+' : ''}Bs {todayProfit.toFixed(2)}
+              </span>
+            </div>
+          </div>
+
+          {/* Profit Global */}
+          <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-2 shadow-lg">
+            <div className="flex items-center gap-1.5 text-slate-400">
+              <BarChart2 className="w-3.5 h-3.5" />
+              <span className="text-[10px] uppercase tracking-widest font-medium">Total</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {globalProfit >= 0
+                ? <TrendingUp className="w-4 h-4 text-blue-400" />
+                : <TrendingDown className="w-4 h-4 text-red-400" />
+              }
+              <span className={cn(
+                "text-xl font-black",
+                globalProfit > 0 ? "text-blue-400" : globalProfit < 0 ? "text-red-400" : "text-slate-400"
+              )}>
+                {globalProfit >= 0 ? '+' : ''}Bs {globalProfit.toFixed(2)}
+              </span>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -44,9 +92,6 @@ export default async function Dashboard() {
           <div className="flex-1">
             <p className="font-bold text-red-300 text-sm">Quiebra registrada</p>
             <p className="text-xs text-red-400/70 mt-0.5">El bankroll llegó a 0. Registra un depósito para continuar.</p>
-          </div>
-          <div className="text-red-400/60">
-            <ArrowDownCircle className="w-5 h-5" />
           </div>
         </div>
       )}
