@@ -163,7 +163,7 @@ export default function StatsDashboard({ initialStats, initialPeriod }: { initia
                   itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
                   labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
                   labelFormatter={(label) => formatDate(label as string)}
-                  formatter={(value: number) => [`Bs ${value.toFixed(2)}`, 'Profit Acumulado']}
+                  formatter={(value) => [`Bs ${(value as number).toFixed(2)}`, 'Profit Acumulado']}
                 />
                 <Area 
                   type="monotone" 
@@ -218,8 +218,8 @@ export default function StatsDashboard({ initialStats, initialPeriod }: { initia
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
                   itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
                   labelStyle={{ display: 'none' }}
-                  formatter={(value: number, name: string, props: any) => [
-                    `Bs ${value.toFixed(2)} (${props.payload.count} apuestas)`, 
+                  formatter={(value, _name, props) => [
+                    `Bs ${(value as number).toFixed(2)} (${(props as any).payload.count} apuestas)`, 
                     'Ganancia'
                   ]}
                 />
