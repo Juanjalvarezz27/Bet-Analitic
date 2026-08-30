@@ -22,6 +22,16 @@ export default function NewBetPage() {
   const [result, setResult] = useState<{ imported: number; skipped: number; message: string } | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [pasteText, setPasteText] = useState('');
+  const [excludedBetIds, setExcludedBetIds] = useState<Set<string>>(new Set());
+
+  const toggleExclude = (id: string) => {
+    setExcludedBetIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   // Procesa texto pegado desde el portapapeles
   const processPasteText = (text: string) => {
@@ -36,6 +46,7 @@ export default function NewBetPage() {
         return true;
       });
       setParsedBets(unique);
+      setExcludedBetIds(new Set());
       setStatus('preview');
     } catch (err) {
       console.error(err);
@@ -46,14 +57,15 @@ export default function NewBetPage() {
 
   // Confirmar importación
   const handleImport = async () => {
-    if (parsedBets.length === 0) return;
+    const includedBets = parsedBets.filter(b => !excludedBetIds.has(b.externalId));
+    if (includedBets.length === 0) return;
     setStatus('importing');
 
     try {
       const res = await fetch('/api/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bets: parsedBets, sport }),
+        body: JSON.stringify({ bets: includedBets, sport }),
       });
       const data = await res.json();
       setResult(data);
@@ -67,10 +79,13 @@ export default function NewBetPage() {
   const reset = () => {
     setStatus('idle');
     setParsedBets([]);
+    setExcludedBetIds(new Set());
     setResult(null);
     setErrorMsg('');
     setPasteText('');
   };
+
+  const includedBets = parsedBets.filter(b => !excludedBetIds.has(b.externalId));
 
   return (
     <main className="flex-1 flex flex-col p-4 w-full h-full pb-20 md:pb-4">
@@ -148,10 +163,15 @@ export default function NewBetPage() {
         {/* ESTADO: PREVIEW */}
         {status === 'preview' && (
           <div className="flex flex-col gap-4 flex-1">
-            <div className="flex items-center gap-3 bg-slate-800/60 rounded-xl p-3 border border-slate-700/50">
+            <div className="flex items-center justify-between gap-3 bg-slate-800/60 rounded-xl p-3 border border-slate-700/50">
               <span className="text-sm font-bold text-slate-200">
-                {parsedBets.length} <span className="text-slate-500 font-normal">apuestas encontradas</span>
+                {includedBets.length} <span className="text-slate-500 font-normal">apuestas a importar</span>
               </span>
+              {excludedBetIds.size > 0 && (
+                <span className="text-xs text-slate-400 font-medium px-2 py-1 bg-slate-800 rounded-md">
+                  {excludedBetIds.size} excluidas
+                </span>
+              )}
             </div>
 
             {parsedBets.length === 0 ? (
@@ -169,23 +189,44 @@ export default function NewBetPage() {
             ) : (
               <>
                 <div className="flex flex-col gap-2">
-                  {parsedBets.map((bet, i) => (
-                    <div key={i} className="bg-slate-800 rounded-xl p-3 flex justify-between items-center gap-2 border border-slate-700/50">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-slate-300 truncate">{bet.event}</p>
-                        <p className="text-[11px] text-slate-500">{bet.rawDate}</p>
+                  {parsedBets.map((bet, i) => {
+                    const isExcluded = excludedBetIds.has(bet.externalId);
+                    return (
+                    <div 
+                      key={i} 
+                      onClick={() => toggleExclude(bet.externalId)}
+                      className={cn(
+                        "rounded-xl p-3 flex justify-between items-center gap-2 border transition-all cursor-pointer",
+                        isExcluded 
+                          ? "bg-slate-900 border-slate-800 opacity-50" 
+                          : "bg-slate-800 border-slate-700/50 hover:border-slate-600"
+                      )}
+                    >
+                      <div className="flex-1 min-w-0 flex items-center gap-3">
+                        <div className={cn(
+                          "w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-colors",
+                          isExcluded ? "border-slate-700 bg-slate-800" : "border-orange-500 bg-orange-500"
+                        )}>
+                          {!isExcluded && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                        </div>
+                        <div className="min-w-0">
+                          <p className={cn("text-xs font-semibold truncate", isExcluded ? "text-slate-500" : "text-slate-300")}>{bet.event}</p>
+                          <p className="text-[11px] text-slate-500">{bet.rawDate}</p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="text-xs text-slate-400">Stake: <span className="text-slate-200">Bs {bet.stake.toFixed(2)}</span></span>
+                        <span className="text-xs text-slate-400">Stake: <span className={cn(isExcluded ? "text-slate-500" : "text-slate-200")}>Bs {bet.stake.toFixed(2)}</span></span>
                         <span className={cn(
                           "text-xs font-bold px-2 py-0.5 rounded-md",
-                          bet.status === 'WON' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                          bet.status === 'WON' 
+                            ? (isExcluded ? 'bg-slate-800 text-slate-600' : 'bg-emerald-500/20 text-emerald-400') 
+                            : (isExcluded ? 'bg-slate-800 text-slate-600' : 'bg-red-500/20 text-red-400')
                         )}>
                           {bet.status === 'WON' ? `+Bs ${bet.profit.toFixed(2)}` : `Bs ${bet.profit.toFixed(2)}`}
                         </span>
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
 
                 <div className="bg-slate-800/80 rounded-xl p-4 border border-slate-700/50 flex flex-col gap-3 mt-2">
@@ -193,21 +234,21 @@ export default function NewBetPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div className="flex flex-col">
                       <span className="text-xs text-slate-400">Total Stake</span>
-                      <span className="font-semibold text-slate-200">Bs {parsedBets.reduce((acc, bet) => acc + bet.stake, 0).toFixed(2)}</span>
+                      <span className="font-semibold text-slate-200">Bs {includedBets.reduce((acc, bet) => acc + bet.stake, 0).toFixed(2)}</span>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-xs text-slate-400">Profit Esperado</span>
-                      <span className={cn("font-bold", parsedBets.reduce((acc, bet) => acc + bet.profit, 0) > 0 ? "text-emerald-400" : parsedBets.reduce((acc, bet) => acc + bet.profit, 0) < 0 ? "text-red-400" : "text-slate-200")}>
-                        {parsedBets.reduce((acc, bet) => acc + bet.profit, 0) > 0 ? '+' : ''}{parsedBets.reduce((acc, bet) => acc + bet.profit, 0).toFixed(2)}
+                      <span className={cn("font-bold", includedBets.reduce((acc, bet) => acc + bet.profit, 0) > 0 ? "text-emerald-400" : includedBets.reduce((acc, bet) => acc + bet.profit, 0) < 0 ? "text-red-400" : "text-slate-200")}>
+                        {includedBets.reduce((acc, bet) => acc + bet.profit, 0) > 0 ? '+' : ''}{includedBets.reduce((acc, bet) => acc + bet.profit, 0).toFixed(2)}
                       </span>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-xs text-slate-400">Ganadas</span>
-                      <span className="font-semibold text-emerald-400">{parsedBets.filter(b => b.status === 'WON').length}</span>
+                      <span className="font-semibold text-emerald-400">{includedBets.filter(b => b.status === 'WON').length}</span>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-xs text-slate-400">Perdidas</span>
-                      <span className="font-semibold text-red-400">{parsedBets.filter(b => b.status === 'LOST').length}</span>
+                      <span className="font-semibold text-red-400">{includedBets.filter(b => b.status === 'LOST').length}</span>
                     </div>
                   </div>
                 </div>
@@ -221,9 +262,10 @@ export default function NewBetPage() {
                   </button>
                   <button
                     onClick={handleImport}
-                    className="flex-2 flex-[2] py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm transition-colors shadow-lg shadow-orange-500/20"
+                    disabled={includedBets.length === 0}
+                    className="flex-2 flex-[2] py-3 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:bg-slate-700 disabled:text-slate-500 disabled:shadow-none text-white font-bold text-sm transition-colors shadow-lg shadow-orange-500/20"
                   >
-                    Importar {parsedBets.length} apuestas
+                    Importar {includedBets.length} apuestas
                   </button>
                 </div>
               </>
