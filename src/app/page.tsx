@@ -2,13 +2,13 @@ import { getDashboardData } from '@/lib/actions/bet-actions';
 import { getBankrollState } from '@/lib/actions/bank-actions';
 import BetCard from '@/components/BetCard';
 import FAB from '@/components/FAB';
-import { Wallet, Skull, TrendingUp, TrendingDown, CalendarDays, BarChart2 } from 'lucide-react';
+import { Wallet, Skull, TrendingUp, TrendingDown, CalendarDays, BarChart2, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Dashboard() {
-  const [{ recentBets, globalProfit, todayProfit }, { isBankrupt, totalDeposited, totalWithdrawn }] = await Promise.all([
+  const [{ recentBets, globalProfit, todayProfit, greenDays, redDays }, { isBankrupt, totalDeposited, totalWithdrawn }] = await Promise.all([
     getDashboardData(),
     getBankrollState(),
   ]);
@@ -16,6 +16,7 @@ export default async function Dashboard() {
   // Saldo disponible en el casino = capital activo + ganancias de apuestas
   const netCapital = totalDeposited - totalWithdrawn;
   const casinoBankroll = netCapital + globalProfit;
+
 
   return (
     <main className="flex-1 flex flex-col p-4 w-full h-full pb-20">
@@ -40,10 +41,10 @@ export default async function Dashboard() {
           </div>
         </div>
 
-        {/* Tarjetas: Profit hoy y Profit total */}
-        <div className="flex flex-col gap-3 w-full max-w-sm">
+        {/* Tarjetas: Profit hoy, Profit total y Racha */}
+        <div className="flex flex-col md:flex-row gap-3 w-full max-w-4xl justify-center">
           {/* Profit de Hoy */}
-          <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-2 shadow-lg overflow-hidden">
+          <div className="flex-1 bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-2 shadow-lg overflow-hidden">
             <div className="flex items-center gap-1.5 text-slate-400">
               <CalendarDays className="w-3.5 h-3.5 shrink-0" />
               <span className="text-[10px] uppercase tracking-widest font-medium">Hoy</span>
@@ -63,7 +64,7 @@ export default async function Dashboard() {
           </div>
 
           {/* Profit Global */}
-          <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-2 shadow-lg overflow-hidden">
+          <div className="flex-1 bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-2 shadow-lg overflow-hidden">
             <div className="flex items-center gap-1.5 text-slate-400">
               <BarChart2 className="w-3.5 h-3.5 shrink-0" />
               <span className="text-[10px] uppercase tracking-widest font-medium">Total</span>
@@ -81,7 +82,26 @@ export default async function Dashboard() {
               </span>
             </div>
           </div>
+
+          {/* Días Verdes vs Rojos */}
+          <div className="flex-1 bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 flex flex-col gap-3 shadow-lg">
+            <span className="text-[10px] uppercase tracking-widest font-medium text-slate-400">
+              Días (Verde vs Rojo)
+            </span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl">
+                <Check className="w-4 h-4 text-emerald-500" />
+                <span className="text-lg font-black text-emerald-400">{greenDays}</span>
+              </div>
+              <span className="text-slate-600 font-bold">-</span>
+              <div className="flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-xl">
+                <X className="w-4 h-4 text-red-500" />
+                <span className="text-lg font-black text-red-400">{redDays}</span>
+              </div>
+            </div>
+          </div>
         </div>
+
       </header>
 
       {/* Banner de quiebra */}

@@ -82,10 +82,52 @@ export async function getDashboardData() {
     },
   });
 
+  // Racha actual: apuestas resueltas más recientes en orden descendente
+  const resolvedBets = await prisma.bet.findMany({
+    where: { status: { in: ['WON', 'LOST'] } },
+    orderBy: { date: 'desc' },
+    take: 50,
+    select: { status: true },
+  });
+
+  let streak = 0;
+  let streakType: 'WON' | 'LOST' | null = null;
+  if (resolvedBets.length > 0) {
+    streakType = resolvedBets[0].status as 'WON' | 'LOST';
+    for (const b of resolvedBets) {
+      if (b.status === streakType) streak++;
+      else break;
+    }
+  }
+
+  // Días ganados vs perdidos
+  const allResolvedBetsForDays = await prisma.bet.findMany({
+    where: { status: { in: ['WON', 'LOST', 'VOID'] } },
+    select: { date: true, profit: true },
+  });
+
+  const dailyProfitMap: Record<string, number> = {};
+  for (const bet of allResolvedBetsForDays) {
+    const dateStr = bet.date.toISOString().split('T')[0];
+    if (!dailyProfitMap[dateStr]) dailyProfitMap[dateStr] = 0;
+    dailyProfitMap[dateStr] += (bet.profit || 0);
+  }
+
+  let greenDays = 0;
+  let redDays = 0;
+  for (const profit of Object.values(dailyProfitMap)) {
+    if (profit > 0) greenDays++;
+    else if (profit < 0) redDays++;
+  }
+
   return {
     recentBets: bets,
     globalProfit: totalProfit._sum.profit || 0,
     todayProfit: todayProfit._sum.profit || 0,
+    streak,
+    streakType,
+    greenDays,
+    redDays,
   };
 }
 
