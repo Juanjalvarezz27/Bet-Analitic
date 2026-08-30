@@ -126,6 +126,10 @@ export async function getStatsData(period: string = 'all') {
   // Profit by sport
   const sportStats: Record<string, { profit: number, count: number }> = {};
   const dailyProfitMap: Record<string, number> = {};
+  
+  let highestWin = 0;
+  let worstLoss = 0;
+  let totalOdds = 0;
 
   for (const bet of allResolvedBets) {
     // Deportes
@@ -141,7 +145,16 @@ export async function getStatsData(period: string = 'all') {
       dailyProfitMap[dateStr] = 0;
     }
     dailyProfitMap[dateStr] += (bet.profit || 0);
+
+    // Nuevos KPIs
+    totalOdds += bet.odds;
+    const profit = bet.profit || 0;
+    if (profit > highestWin) highestWin = profit;
+    if (profit < worstLoss) worstLoss = profit;
   }
+
+  const avgStake = totalBets > 0 ? totalStake / totalBets : 0;
+  const avgOdds = totalBets > 0 ? totalOdds / totalBets : 0;
 
   // Preparar dailyProfit para Recharts (acumulativo)
   const dailyProfitData = Object.entries(dailyProfitMap)
@@ -165,5 +178,54 @@ export async function getStatsData(period: string = 'all') {
     totalBets,
     sportStats,
     dailyProfit,
+    avgStake,
+    avgOdds,
+    highestWin,
+    worstLoss,
+  };
+}
+
+export async function getPaginatedBets(page: number = 1, period: string = 'all', filterStatus: string = 'ALL') {
+  const limit = 20;
+  const skip = (page - 1) * limit;
+
+  const now = new Date();
+  let startDate = new Date(0);
+
+  if (period === 'today') {
+    startDate = new Date(now);
+    startDate.setHours(0, 0, 0, 0);
+  } else if (period === 'week') {
+    startDate = new Date(now);
+    startDate.setDate(now.getDate() - 7);
+  } else if (period === 'month') {
+    startDate = new Date(now);
+    startDate.setMonth(now.getMonth() - 1);
+  } else if (period === 'year') {
+    startDate = new Date(now);
+    startDate.setFullYear(now.getFullYear() - 1);
+  }
+
+  const whereClause: any = {
+    date: { gte: startDate }
+  };
+
+  if (filterStatus !== 'ALL') {
+    whereClause.status = filterStatus;
+  }
+
+  const bets = await prisma.bet.findMany({
+    where: whereClause,
+    orderBy: { date: 'desc' },
+    take: limit,
+    skip: skip
+  });
+
+  const total = await prisma.bet.count({ where: whereClause });
+
+  return {
+    bets,
+    total,
+    hasMore: skip + bets.length < total
   };
 }
