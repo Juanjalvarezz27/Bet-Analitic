@@ -34,19 +34,25 @@ export default function NewBetPage() {
   };
 
   // Procesa texto pegado desde el portapapeles
-  const processPasteText = (text: string) => {
+  const processPasteText = (text: string, append = false) => {
     if (!text.trim()) return;
     setStatus('processing');
     try {
-      const bets = parsePastedText(text);
+      const newBets = parsePastedText(text);
+      const combinedBets = append ? [...parsedBets, ...newBets] : newBets;
+
       const seen = new Set<string>();
-      const unique = bets.filter(b => {
+      const unique = combinedBets.filter(b => {
         if (!b.externalId || seen.has(b.externalId)) return false;
         seen.add(b.externalId);
         return true;
       });
+      
       setParsedBets(unique);
-      setExcludedBetIds(new Set());
+      if (!append) {
+        setExcludedBetIds(new Set());
+      }
+      setPasteText(''); // Limpiar para futuros pegados
       setStatus('preview');
     } catch (err) {
       console.error(err);
@@ -163,6 +169,31 @@ export default function NewBetPage() {
         {/* ESTADO: PREVIEW */}
         {status === 'preview' && (
           <div className="flex flex-col gap-4 flex-1">
+            <div className="flex flex-col gap-2 bg-slate-800/60 border border-slate-700/50 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <ClipboardPaste className="w-5 h-5 text-orange-400" />
+                <p className="font-semibold text-sm text-slate-200">Agregar más apuestas</p>
+              </div>
+              <textarea
+                className="w-full h-16 bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-slate-300 font-mono focus:outline-none focus:border-orange-500 resize-none"
+                placeholder="Pega aquí más historial copiado..."
+                value={pasteText}
+                onChange={(e) => setPasteText(e.target.value)}
+                onPaste={(e) => {
+                  const text = e.clipboardData.getData('text');
+                  setPasteText(text);
+                  setTimeout(() => processPasteText(text, true), 100);
+                }}
+              />
+              <button
+                onClick={() => processPasteText(pasteText, true)}
+                disabled={!pasteText.trim()}
+                className="w-full py-2.5 mt-1 rounded-lg bg-orange-500 hover:bg-orange-600 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold text-xs transition-colors"
+              >
+                Analizar y agregar a la lista
+              </button>
+            </div>
+
             <div className="flex items-center justify-between gap-3 bg-slate-800/60 rounded-xl p-3 border border-slate-700/50">
               <span className="text-sm font-bold text-slate-200">
                 {includedBets.length} <span className="text-slate-500 font-normal">apuestas a importar</span>
