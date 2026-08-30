@@ -123,11 +123,6 @@ export default function NewBetPage() {
                   placeholder="Pega aquí el historial copiado..."
                   value={pasteText}
                   onChange={(e) => setPasteText(e.target.value)}
-                  onPaste={(e) => {
-                    const text = e.clipboardData.getData('text');
-                    setPasteText(text);
-                    setTimeout(() => processPasteText(text), 100);
-                  }}
                 />
                 <button
                   onClick={() => processPasteText(pasteText)}
@@ -179,11 +174,6 @@ export default function NewBetPage() {
                 placeholder="Pega aquí más historial copiado..."
                 value={pasteText}
                 onChange={(e) => setPasteText(e.target.value)}
-                onPaste={(e) => {
-                  const text = e.clipboardData.getData('text');
-                  setPasteText(text);
-                  setTimeout(() => processPasteText(text, true), 100);
-                }}
               />
               <button
                 onClick={() => processPasteText(pasteText, true)}
