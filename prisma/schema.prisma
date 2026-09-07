@@ -21,6 +21,7 @@ enum BankEventType {
   WITHDRAWAL
   BANKRUPT
   BALANCE_UPDATE
+  BONUS
 }
 
 model Bet {

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { X, ArrowDownCircle, ArrowUpCircle, Skull, Loader2 } from 'lucide-react';
+import { X, ArrowDownCircle, ArrowUpCircle, Skull, Loader2, Gift } from 'lucide-react';
 import { createBankEvent } from '@/lib/actions/bank-actions';
 import { cn } from '@/lib/utils';
 
-type EventType = 'DEPOSIT' | 'WITHDRAWAL' | 'BANKRUPT';
+type EventType = 'DEPOSIT' | 'WITHDRAWAL' | 'BANKRUPT' | 'BONUS';
 
 interface Props {
   onClose: () => void;
@@ -41,6 +41,16 @@ const OPTIONS = [
     bg: 'bg-red-500/10',
     border: 'border-red-500/30',
     activeBorder: 'border-red-500',
+  },
+  {
+    type: 'BONUS' as EventType,
+    label: 'Bono Casino',
+    desc: 'Regalo sin depósito',
+    icon: Gift,
+    color: 'text-purple-400',
+    bg: 'bg-purple-500/10',
+    border: 'border-purple-500/30',
+    activeBorder: 'border-purple-500',
   },
 ];
 
@@ -105,7 +115,7 @@ export default function BankEventModal({ onClose }: Props) {
         ) : (
           <>
             {/* Selector de tipo */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {OPTIONS.map(opt => (
                 <button
                   key={opt.type}

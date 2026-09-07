@@ -23,6 +23,10 @@ export async function getBankrollState() {
     .filter(e => e.type === 'WITHDRAWAL')
     .reduce((sum, e) => sum + e.amount, 0);
 
+  const totalBonus = events
+    .filter(e => e.type === 'BONUS')
+    .reduce((sum, e) => sum + e.amount, 0);
+
   const lastBankrupt = events.find(e => e.type === 'BANKRUPT');
 
   // Quiebra activa si no hay depósito posterior a la última quiebra
@@ -37,6 +41,7 @@ export async function getBankrollState() {
   return {
     totalDeposited,
     totalWithdrawn,
+    totalBonus,
     isBankrupt,
     lastBankruptDate: lastBankrupt?.date ?? null,
     recentEvents: events.slice(0, 10),

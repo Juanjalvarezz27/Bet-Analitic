@@ -2,7 +2,7 @@ import { getBankEvents, getBankrollState } from '@/lib/actions/bank-actions';
 import { getDashboardData } from '@/lib/actions/bet-actions';
 import BankEventList from './BankEventList';
 import FAB from '@/components/FAB';
-import { Wallet, ArrowDownCircle, ArrowUpCircle, TrendingUp, TrendingDown } from 'lucide-react';
+import { Wallet, ArrowDownCircle, ArrowUpCircle, TrendingUp, TrendingDown, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
@@ -14,13 +14,14 @@ export default async function BankPage() {
     getDashboardData()
   ]);
 
-  const { totalDeposited, totalWithdrawn } = bankState;
-  const netCapital = totalDeposited - totalWithdrawn;
+  const { totalDeposited, totalWithdrawn, totalBonus } = bankState;
+  const netCapital = totalDeposited + totalBonus - totalWithdrawn;
   const displayProfit = globalProfit;
   const displayBankroll = netCapital + displayProfit;
 
   const stats = [
     { label: 'Depósitos', value: totalDeposited, icon: ArrowDownCircle, color: 'text-emerald-400', prefix: '+' },
+    { label: 'Bonos', value: totalBonus, icon: Gift, color: 'text-purple-400', prefix: '+' },
     { label: 'Retiros', value: totalWithdrawn, icon: ArrowUpCircle, color: 'text-orange-400', prefix: '-' },
     { label: 'Capital Activo', value: netCapital, icon: Wallet, color: 'text-blue-400', prefix: '' },
     { label: 'Profit Apuestas', value: displayProfit, icon: displayProfit >= 0 ? TrendingUp : TrendingDown, color: displayProfit >= 0 ? 'text-emerald-400' : 'text-red-400', prefix: displayProfit >= 0 ? '+' : '' },

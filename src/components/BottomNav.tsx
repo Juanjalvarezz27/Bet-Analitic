@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, LineChart, Wallet, Activity } from 'lucide-react';
+import { Home, LineChart, Wallet, Activity, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function BottomNav() {
@@ -12,6 +12,7 @@ export default function BottomNav() {
     { href: '/', icon: Home, label: 'Inicio' },
     { href: '/stats', icon: LineChart, label: 'Estadísticas' },
     { href: '/bank', icon: Wallet, label: 'Cartera' },
+    { href: '/interpreter', icon: Sparkles, label: 'Intérprete' },
   ];
 
   return (

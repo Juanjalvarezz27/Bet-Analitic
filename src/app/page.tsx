@@ -8,13 +8,13 @@ import { cn } from '@/lib/utils';
 export const dynamic = 'force-dynamic';
 
 export default async function Dashboard() {
-  const [{ recentBets, globalProfit, todayProfit, greenDays, redDays }, { isBankrupt, totalDeposited, totalWithdrawn }] = await Promise.all([
+  const [{ recentBets, globalProfit, todayProfit, greenDays, redDays }, { isBankrupt, totalDeposited, totalWithdrawn, totalBonus }] = await Promise.all([
     getDashboardData(),
     getBankrollState(),
   ]);
 
   // Saldo disponible en el casino = capital activo + ganancias de apuestas
-  const netCapital = totalDeposited - totalWithdrawn;
+  const netCapital = totalDeposited + totalBonus - totalWithdrawn;
   const casinoBankroll = netCapital + globalProfit;
 
 

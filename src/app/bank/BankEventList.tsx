@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { deleteBankEvent } from '@/lib/actions/bank-actions';
 import { BankEvent } from '@prisma/client';
-import { ArrowDownCircle, ArrowUpCircle, Skull, Trash2, Loader2, Wallet } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Skull, Trash2, Loader2, Wallet, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -27,6 +27,7 @@ export default function BankEventList({ initialEvents }: Props) {
       case 'DEPOSIT':    return { icon: ArrowDownCircle, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', label: 'Depósito', prefix: '+' };
       case 'WITHDRAWAL': return { icon: ArrowUpCircle,   color: 'text-orange-400',  bg: 'bg-orange-500/10 border-orange-500/20',  label: 'Retiro',   prefix: '-' };
       case 'BANKRUPT':   return { icon: Skull,           color: 'text-red-400',     bg: 'bg-red-500/10 border-red-500/20',         label: 'Quiebra',  prefix: ''  };
+      case 'BONUS':      return { icon: Gift,            color: 'text-purple-400',  bg: 'bg-purple-500/10 border-purple-500/20',   label: 'Bono',     prefix: '+' };
       default:           return { icon: Wallet,          color: 'text-blue-400',    bg: 'bg-blue-500/10 border-blue-500/20',       label: 'Ajuste',   prefix: '=' };
     }
   };
@@ -41,7 +42,7 @@ export default function BankEventList({ initialEvents }: Props) {
     );
   }
 
-  const [filter, setFilter] = useState<'ALL' | 'DEPOSIT' | 'WITHDRAWAL' | 'ADJUSTMENT'>('ALL');
+  const [filter, setFilter] = useState<'ALL' | 'DEPOSIT' | 'WITHDRAWAL' | 'ADJUSTMENT' | 'BONUS'>('ALL');
 
   const filteredEvents = filter === 'ALL' 
     ? initialEvents 
@@ -67,7 +68,7 @@ export default function BankEventList({ initialEvents }: Props) {
     <div className="flex flex-col gap-4">
       {/* Filtros */}
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        {['ALL', 'DEPOSIT', 'WITHDRAWAL', 'ADJUSTMENT'].map(f => (
+        {['ALL', 'DEPOSIT', 'WITHDRAWAL', 'BONUS', 'ADJUSTMENT'].map(f => (
           <button
             key={f}
             onClick={() => setFilter(f as any)}
@@ -78,7 +79,7 @@ export default function BankEventList({ initialEvents }: Props) {
                 : "bg-slate-800/50 text-slate-500 hover:text-slate-300 hover:bg-slate-800"
             )}
           >
-            {f === 'ALL' ? 'Todos' : f === 'DEPOSIT' ? 'Depósitos' : f === 'WITHDRAWAL' ? 'Retiros' : 'Ajustes'}
+            {f === 'ALL' ? 'Todos' : f === 'DEPOSIT' ? 'Depósitos' : f === 'WITHDRAWAL' ? 'Retiros' : f === 'BONUS' ? 'Bonos' : 'Ajustes'}
           </button>
         ))}
       </div>
