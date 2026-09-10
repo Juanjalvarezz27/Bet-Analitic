@@ -5,8 +5,7 @@ import { deleteBankEvent } from '@/lib/actions/bank-actions';
 import { BankEvent } from '@prisma/client';
 import { ArrowDownCircle, ArrowUpCircle, Skull, Trash2, Loader2, Wallet, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+
 
 interface Props {
   initialEvents: BankEvent[];
@@ -50,7 +49,7 @@ export default function BankEventList({ initialEvents }: Props) {
 
   // Agrupar eventos filtrados por día
   const groupedEvents = filteredEvents.reduce((acc, event) => {
-    const dateKey = format(new Date(event.date), 'yyyy-MM-dd');
+    const dateKey = new Date(event.date).toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
     const existing = acc.find(g => g.dateKey === dateKey);
     if (existing) {
       existing.events.push(event);
@@ -93,7 +92,7 @@ export default function BankEventList({ initialEvents }: Props) {
           groupedEvents.map((group) => (
             <div key={group.dateKey} className="flex flex-col gap-3">
               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-2 border-l-2 border-slate-700">
-                {format(new Date(`${group.dateKey}T12:00:00`), "EEEE, d 'de' MMMM", { locale: es })}
+                {new Date(`${group.dateKey}T12:00:00-04:00`).toLocaleDateString('es-VE', { timeZone: 'America/Caracas', weekday: 'long', day: 'numeric', month: 'long' })}
               </h3>
               <div className="flex flex-col gap-2">
                 {group.events.map((event) => {
@@ -113,7 +112,7 @@ export default function BankEventList({ initialEvents }: Props) {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-slate-100">{cfg.label}</p>
                           <p suppressHydrationWarning className="text-[11px] text-slate-500 mt-0.5">
-                            Fecha y Hora: {format(new Date(event.date), "dd/MM/yyyy · HH:mm", { locale: es })}
+                             Fecha y Hora: {new Date(event.date).toLocaleString('es-VE', { timeZone: 'America/Caracas', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                           </p>
                           {event.note && (
                             <p className="text-xs text-slate-400 mt-1 italic truncate">"{event.note}"</p>

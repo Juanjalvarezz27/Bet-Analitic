@@ -19,7 +19,8 @@ export function parseAltenarDate(rawDate: string): Date {
   const match = rawDate.match(/(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}:\d{2}:\d{2}))?/);
   if (!match) return new Date();
   const [, day, month, year, time] = match;
-  const iso = `${year}-${month}-${day}${time ? 'T' + time : 'T00:00:00'}`;
+  // Añadimos explícitamente -04:00 para forzar la zona horaria de Caracas
+  const iso = `${year}-${month}-${day}${time ? 'T' + time : 'T00:00:00'}-04:00`;
   const d = new Date(iso);
   return isNaN(d.getTime()) ? new Date() : d;
 }

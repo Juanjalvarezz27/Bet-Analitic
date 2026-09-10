@@ -96,7 +96,7 @@ export default function StatsDashboard({ initialStats, initialPeriod }: { initia
     : historyBets;
 
   const groupedBets = filteredBets.reduce((acc, bet) => {
-    const d = new Date(bet.date).toISOString().split('T')[0];
+    const d = new Date(bet.date).toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
     if (!acc[d]) acc[d] = [];
     acc[d].push(bet);
     return acc;
@@ -466,7 +466,7 @@ export default function StatsDashboard({ initialStats, initialPeriod }: { initia
                   <div className="flex flex-col gap-2">
                     {bets.map((bet) => {
                       const isExpanded = expandedBetId === bet.id;
-                      const betTime = new Date(bet.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                      const betTime = new Date(bet.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Caracas' });
                       return (
                         <div key={bet.id} className="bg-slate-800/80 rounded-xl border border-slate-700/50 overflow-hidden transition-all">
                           {/* Fila principal — clickeable */}

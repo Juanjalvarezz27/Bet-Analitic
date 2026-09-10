@@ -1,6 +1,7 @@
 'use server';
 
 import prisma from '@/lib/prisma';
+import { toCaracasDateStr } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 import { BetStatus } from '@prisma/client';
 
@@ -108,7 +109,7 @@ export async function getDashboardData() {
 
   const dailyProfitMap: Record<string, number> = {};
   for (const bet of allResolvedBetsForDays) {
-    const dateStr = bet.date.toISOString().split('T')[0];
+    const dateStr = toCaracasDateStr(bet.date);
     if (!dailyProfitMap[dateStr]) dailyProfitMap[dateStr] = 0;
     dailyProfitMap[dateStr] += (bet.profit || 0);
   }
@@ -182,7 +183,7 @@ export async function getStatsData(period: string = 'all') {
     sportStats[bet.sport].count += 1;
 
     // Daily Profit
-    const dateStr = bet.date.toISOString().split('T')[0];
+    const dateStr = toCaracasDateStr(bet.date);
     if (!dailyProfitMap[dateStr]) {
       dailyProfitMap[dateStr] = 0;
     }
