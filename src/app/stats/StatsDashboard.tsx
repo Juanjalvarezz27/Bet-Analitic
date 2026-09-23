@@ -323,6 +323,7 @@ export default function StatsDashboard({ initialStats, initialPeriod }: { initia
                     contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px', padding: '10px 14px' }}
                     itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
                     labelStyle={{ color: '#94a3b8', marginBottom: '4px', fontSize: '11px' }}
+                    wrapperStyle={{ transform: 'translateX(calc(-100% - 12px))' }}
                     labelFormatter={(label) => formatDate(label as string)}
                     formatter={(value) => {
                       const v = value as number;
