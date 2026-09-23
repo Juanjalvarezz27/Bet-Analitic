@@ -1,10 +1,10 @@
 import { parseAltenarRows, type ParsedBet } from './altenar';
+import { parseCasinoRows } from './casino';
 
 // Parsea texto pegado desde el clipboard al copiar una tabla HTML en el navegador.
 // Los navegadores copian tablas como texto separado por TABS (\t) con saltos de línea (\n).
-// Formato esperado (copiado del historial de Altenar):
+// Formato esperado (copiado del historial de la plataforma):
 // Fecha\tID\tPlataforma\tDescripción\tDébito\tCrédito\tSaldo\n
-// 23-08-2026 18:46:50\t27632353302\tAltenar\tApuesta #5327259530 ganada...\t-\t5,600.28\t6,099.76\n
 export function parsePastedText(raw: string): ParsedBet[] {
   const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
   if (lines.length === 0) return [];
@@ -17,13 +17,14 @@ export function parsePastedText(raw: string): ParsedBet[] {
 
   // Si la primera línea NO parece ser encabezados (empieza con una fecha), ignorar encabezados
   const startsWithDate = /^\d{2}-\d{2}-\d{4}/.test(lines[0]);
-  let dataLines = startsWithDate ? lines : lines.slice(1);
+  const dataLines = startsWithDate ? lines : lines.slice(1);
+
+  const defaultHeaders = ['Fecha', 'ID', 'Plataforma', 'Descripción', 'Débito', 'Crédito', 'Saldo'];
 
   // Construir filas como objetos usando los encabezados
   const rows: Record<string, string>[] = [];
 
   if (!startsWithDate && headers.length > 1) {
-    // Hay encabezados: mapear cada columna
     for (const line of dataLines) {
       const cols = line.split(sep);
       const row: Record<string, string> = {};
@@ -33,8 +34,6 @@ export function parsePastedText(raw: string): ParsedBet[] {
       rows.push(row);
     }
   } else {
-    // Sin encabezados: mapear por posición con nombres esperados de Altenar
-    const defaultHeaders = ['Fecha', 'ID', 'Plataforma', 'Descripción', 'Débito', 'Crédito', 'Saldo'];
     for (const line of dataLines) {
       const cols = line.split(sep);
       const row: Record<string, string> = {};
@@ -45,7 +44,16 @@ export function parsePastedText(raw: string): ParsedBet[] {
     }
   }
 
-  return parseAltenarRows(rows);
+  // Combinar apuestas deportivas (Altenar) y jugadas de casino
+  const altenarBets = parseAltenarRows(rows);
+  const casinoBets = parseCasinoRows(rows);
+  const all = [...altenarBets, ...casinoBets];
+
+  // Deduplicar por externalId (por si acaso)
+  const seen = new Set<string>();
+  return all.filter(b => {
+    if (!b.externalId || seen.has(b.externalId)) return false;
+    seen.add(b.externalId);
+    return true;
+  });
 }
-
-

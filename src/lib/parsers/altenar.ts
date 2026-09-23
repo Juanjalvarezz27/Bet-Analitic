@@ -13,16 +13,18 @@ export interface ParsedBet {
   market: string;
 }
 
-// Parsea fecha en formato "23-08-2026 17:32:38" o "23-08-2026" a Date
+// Parsea fecha en formato "23-08-2026 17:32:38", "23/08/2026", etc., a Date (UTC-4)
 export function parseAltenarDate(rawDate: string): Date {
-  // Intenta DD-MM-YYYY HH:mm:ss
-  const match = rawDate.match(/(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}:\d{2}:\d{2}))?/);
-  if (!match) return new Date();
-  const [, day, month, year, time] = match;
-  // Añadimos explícitamente -04:00 para forzar la zona horaria de Caracas
-  const iso = `${year}-${month}-${day}${time ? 'T' + time : 'T00:00:00'}-04:00`;
-  const d = new Date(iso);
-  return isNaN(d.getTime()) ? new Date() : d;
+  if (!rawDate) return new Date();
+  const match = rawDate.trim().match(/(\d{2})[-/](\d{2})[-/](\d{4})(?:\s+(\d{2}:\d{2}:\d{2}))?/);
+  if (match) {
+    const [, day, month, year, time] = match;
+    const iso = `${year}-${month}-${day}${time ? 'T' + time : 'T00:00:00'}-04:00`;
+    const d = new Date(iso);
+    if (!isNaN(d.getTime())) return d;
+  }
+  const fallback = new Date(rawDate);
+  return isNaN(fallback.getTime()) ? new Date() : fallback;
 }
 
 // Limpia string numérico: "8,425.70" → 8425.70

@@ -1,7 +1,7 @@
 'use server';
 
 import prisma from '@/lib/prisma';
-import { toCaracasDateStr } from '@/lib/utils';
+import { toCaracasDateStr, getCaracasDayRange, getCaracasPeriodRange } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 import { BetStatus } from '@prisma/client';
 
@@ -20,6 +20,7 @@ export async function createBet(formData: FormData) {
       stake,
       odds,
       status: 'PENDING',
+      date: new Date(),
     },
   });
 
@@ -55,13 +56,13 @@ export async function updateBetStatus(id: string, status: BetStatus) {
 }
 
 export async function getDashboardData() {
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
+  const { startOfDay, endOfDay } = getCaracasDayRange();
 
   const bets = await prisma.bet.findMany({
     where: {
       date: {
         gte: startOfDay,
+        lte: endOfDay,
       }
     },
     orderBy: { date: 'desc' },
@@ -74,12 +75,15 @@ export async function getDashboardData() {
     where: { status: { in: ['WON', 'LOST', 'VOID'] } },
   });
 
-  // Profit solo del día de hoy
+  // Profit solo del día de hoy (según zona horaria de Caracas)
   const todayProfit = await prisma.bet.aggregate({
     _sum: { profit: true },
     where: { 
       status: { in: ['WON', 'LOST', 'VOID'] },
-      date: { gte: startOfDay },
+      date: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
     },
   });
 
@@ -133,27 +137,17 @@ export async function getDashboardData() {
 }
 
 export async function getStatsData(period: string = 'all') {
-  const now = new Date();
-  let startDate = new Date(0);
+  const { startDate, endDate } = getCaracasPeriodRange(period);
 
-  if (period === 'today') {
-    startDate = new Date(now);
-    startDate.setHours(0, 0, 0, 0);
-  } else if (period === 'week') {
-    startDate = new Date(now);
-    startDate.setDate(now.getDate() - 7);
-  } else if (period === 'month') {
-    startDate = new Date(now);
-    startDate.setMonth(now.getMonth() - 1);
-  } else if (period === 'year') {
-    startDate = new Date(now);
-    startDate.setFullYear(now.getFullYear() - 1);
+  const dateFilter: { gte: Date; lte?: Date } = { gte: startDate };
+  if (endDate) {
+    dateFilter.lte = endDate;
   }
 
   const allResolvedBets = await prisma.bet.findMany({
     where: { 
       status: { in: ['WON', 'LOST'] },
-      date: { gte: startDate }
+      date: dateFilter
     },
     orderBy: { date: 'asc' }
   });
@@ -232,25 +226,15 @@ export async function getPaginatedBets(page: number = 1, period: string = 'all',
   const limit = 20;
   const skip = (page - 1) * limit;
 
-  const now = new Date();
-  let startDate = new Date(0);
+  const { startDate, endDate } = getCaracasPeriodRange(period);
 
-  if (period === 'today') {
-    startDate = new Date(now);
-    startDate.setHours(0, 0, 0, 0);
-  } else if (period === 'week') {
-    startDate = new Date(now);
-    startDate.setDate(now.getDate() - 7);
-  } else if (period === 'month') {
-    startDate = new Date(now);
-    startDate.setMonth(now.getMonth() - 1);
-  } else if (period === 'year') {
-    startDate = new Date(now);
-    startDate.setFullYear(now.getFullYear() - 1);
+  const dateFilter: { gte: Date; lte?: Date } = { gte: startDate };
+  if (endDate) {
+    dateFilter.lte = endDate;
   }
 
   const whereClause: any = {
-    date: { gte: startDate }
+    date: dateFilter
   };
 
   if (filterStatus !== 'ALL') {

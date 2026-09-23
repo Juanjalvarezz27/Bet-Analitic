@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     // Insertar en bulk
     await prisma.bet.createMany({
       data: newBets.map(b => ({
-        date: b.date,
+        date: new Date(b.date),
         sport: sport || 'Desconocido',
         event: b.event,
         market: b.market,

@@ -2,7 +2,7 @@
 
 import { Bet } from '@prisma/client';
 import { updateBetStatus } from '@/lib/actions/bet-actions';
-import { cn } from '@/lib/utils';
+import { cn, formatCaracasTime } from '@/lib/utils';
 import { Check, X, CircleSlash, Trophy, Activity, Sword, Flame, Target, TrendingUp, TrendingDown, Clock, Hash } from 'lucide-react';
 import { useTransition } from 'react';
 
@@ -40,6 +40,9 @@ export default function BetCard({ bet }: { bet: Bet }) {
           <div className="p-1.5 bg-slate-700/50 rounded-lg group-hover:bg-slate-700 group-hover:text-orange-400 transition-colors">
             {getSportIcon(bet.sport)}
           </div>
+          <span className="text-xs font-medium text-slate-400" suppressHydrationWarning>
+            {formatCaracasTime(bet.date)}
+          </span>
         </div>
         <div className={cn("text-[10px] font-bold px-2.5 py-1 rounded-full border flex items-center gap-1.5", statusConfig.bg, statusConfig.color, statusConfig.border)}>
           {bet.status === 'PENDING' && <Clock className="w-3 h-3" />}

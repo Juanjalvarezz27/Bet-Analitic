@@ -12,7 +12,7 @@ type ImportStatus = 'idle' | 'processing' | 'preview' | 'importing' | 'done' | '
 
 const SPORTS = [
   'Desconocido', 'Fútbol', 'Tenis', 'Baloncesto',
-  'MMA', 'Béisbol', 'Fútbol Americano', 'eSports', 'Otro'
+  'MMA', 'Béisbol', 'Fútbol Americano', 'eSports', 'Casino', 'Otro'
 ];
 
 export default function NewBetPage() {
@@ -102,7 +102,7 @@ export default function NewBetPage() {
           </Link>
           <div>
             <h1 className="text-xl font-bold text-slate-100">Nueva Apuesta</h1>
-            <p className="text-xs text-slate-400">Pegar historial de Altenar</p>
+            <p className="text-xs text-slate-400">Pegar historial de Altenar o Casino</p>
           </div>
         </header>
 
@@ -115,12 +115,12 @@ export default function NewBetPage() {
                   <ClipboardPaste className="w-8 h-8 text-orange-400" />
                   <div className="text-left flex-1">
                     <p className="font-semibold text-slate-200">Pegar tabla copiada</p>
-                    <p className="text-xs text-slate-400">Copia la tabla del navegador y pega aquí</p>
+                    <p className="text-xs text-slate-400">Altenar, upgaming, PragmaticPlay Live Casino y más</p>
                   </div>
                 </div>
                 <textarea
                   className="w-full h-40 bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-slate-300 font-mono focus:outline-none focus:border-orange-500 resize-none"
-                  placeholder="Pega aquí el historial copiado..."
+                  placeholder="Pega aquí el historial copiado (Altenar, upgaming, PragmaticPlay...)"
                   value={pasteText}
                   onChange={(e) => setPasteText(e.target.value)}
                 />
@@ -137,7 +137,7 @@ export default function NewBetPage() {
             <div className="bg-slate-800/60 rounded-xl p-4 flex flex-col gap-4 border border-slate-700/50">
               <h3 className="text-sm font-semibold text-slate-300">Opciones</h3>
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-slate-400">Deporte (aplica a todas)</label>
+                <label className="text-sm font-medium text-slate-400">Deporte (aplica a apuestas sin categoría detectada)</label>
                 <div className="relative">
                   <select
                     value={sport}
