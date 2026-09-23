@@ -260,25 +260,41 @@ export default function StatsDashboard({ initialStats, initialPeriod }: { initia
           };
           const interval = needsScroll ? Math.floor(initialStats.dailyProfit.length / 12) : 0;
 
+          // Dot personalizado: verde si positivo, rojo si negativo
+          const CustomDot = (props: { cx?: number; cy?: number; payload?: { profit: number } }) => {
+            const { cx, cy, payload } = props;
+            if (cx === undefined || cy === undefined || !payload) return null;
+            const isPositive = payload.profit >= 0;
+            return (
+              <circle
+                cx={cx} cy={cy} r={3.5}
+                fill={isPositive ? '#10b981' : '#ef4444'}
+                stroke={isPositive ? '#34d399' : '#f87171'}
+                strokeWidth={1.5}
+              />
+            );
+          };
+
           return (
             <div className={`h-64 w-full ${needsScroll ? 'overflow-x-auto scrollbar-hide' : ''}`}>
               <ResponsiveContainer
                 width={needsScroll ? scrollWidth : '100%'}
                 height="100%"
               >
-                <BarChart
+                <AreaChart
                   data={initialStats.dailyProfit}
                   margin={{ top: 10, right: 16, left: 0, bottom: 0 }}
-                  barCategoryGap="28%"
                 >
                   <defs>
-                    <linearGradient id="gradGreen" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
-                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.5} />
+                    {/* Área verde (valores positivos sobre 0) */}
+                    <linearGradient id="areaGreen" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.35} />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.03} />
                     </linearGradient>
-                    <linearGradient id="gradRed" x1="0" y1="1" x2="0" y2="0">
-                      <stop offset="0%" stopColor="#ef4444" stopOpacity={0.9} />
-                      <stop offset="100%" stopColor="#ef4444" stopOpacity={0.5} />
+                    {/* Área roja (valores negativos bajo 0) */}
+                    <linearGradient id="areaRed" x1="0" y1="1" x2="0" y2="0">
+                      <stop offset="0%" stopColor="#ef4444" stopOpacity={0.35} />
+                      <stop offset="100%" stopColor="#ef4444" stopOpacity={0.03} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
@@ -302,22 +318,28 @@ export default function StatsDashboard({ initialStats, initialPeriod }: { initia
                     tickCount={5}
                   />
                   <RechartsTooltip
-                    cursor={{ fill: '#0f172a' }}
+                    cursor={{ stroke: '#334155', strokeWidth: 1, strokeDasharray: '4 4' }}
                     contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px', padding: '10px 14px' }}
                     itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
                     labelStyle={{ color: '#94a3b8', marginBottom: '4px', fontSize: '11px' }}
                     labelFormatter={(label) => formatDate(label as string)}
-                    formatter={(value) => [`Bs ${formatMoney(value as number)}`, 'Ganancia del día']}
+                    formatter={(value) => {
+                      const v = value as number;
+                      return [`Bs ${formatMoney(v)}`, 'Ganancia del día'];
+                    }}
                   />
-                  <Bar dataKey="profit" radius={[6, 6, 2, 2]} maxBarSize={48} minPointSize={3}>
-                    {initialStats.dailyProfit.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={entry.profit >= 0 ? 'url(#gradGreen)' : 'url(#gradRed)'}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
+                  {/* Área verde (profit >= 0) */}
+                  <Area
+                    type="monotone"
+                    dataKey="profit"
+                    stroke="#10b981"
+                    strokeWidth={2}
+                    fill="url(#areaGreen)"
+                    dot={<CustomDot />}
+                    activeDot={{ r: 6, fill: '#10b981', stroke: '#34d399', strokeWidth: 2 }}
+                    baseValue={0}
+                  />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           );
