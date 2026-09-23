@@ -283,7 +283,7 @@ export default function StatsDashboard({ initialStats, initialPeriod }: { initia
               >
                 <AreaChart
                   data={initialStats.dailyProfit}
-                  margin={{ top: 10, right: 16, left: 0, bottom: 0 }}
+                  margin={{ top: 10, right: 24, left: 0, bottom: 0 }}
                 >
                   <defs>
                     {/* Área verde (valores positivos sobre 0) */}
@@ -307,6 +307,7 @@ export default function StatsDashboard({ initialStats, initialPeriod }: { initia
                     axisLine={false}
                     tickLine={false}
                     interval={interval}
+                    padding={{ left: 12, right: 12 }}
                   />
                   <YAxis
                     stroke="#475569"
@@ -338,6 +339,7 @@ export default function StatsDashboard({ initialStats, initialPeriod }: { initia
                     dot={<CustomDot />}
                     activeDot={{ r: 6, fill: '#10b981', stroke: '#34d399', strokeWidth: 2 }}
                     baseValue={0}
+                    isAnimationActive={false}
                   />
                 </AreaChart>
               </ResponsiveContainer>
