@@ -55,6 +55,13 @@ export async function updateBetStatus(id: string, status: BetStatus) {
   revalidatePath('/stats');
 }
 
+export async function deleteBet(id: string) {
+  await prisma.bet.delete({ where: { id } });
+  revalidatePath('/');
+  revalidatePath('/stats');
+  revalidatePath('/bank');
+}
+
 export async function getDashboardData() {
   const { startOfDay, endOfDay } = getCaracasDayRange();
 
